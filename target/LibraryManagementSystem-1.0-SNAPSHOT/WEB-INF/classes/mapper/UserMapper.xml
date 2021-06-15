@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.lucas9.mapper.UserMapper">
+    <delete id="deleteUser">
+        delete
+        from `user`
+        where username = #{username}
+    </delete>
+    <select id="selectUserByUserNamePassword" resultType="top.lucas9.entity.User">
+        select `id`,
+               `username`,
+               `password`,
+               `phone_number`,
+               `email`,
+               `role`,
+               `borrowable_days`,
+               `borrowable_number`,
+               `borrowed_number`
+        from `user`
+        where `username` = #{username}
+          and `password` = md5(#{password})
+    </select>
+    <insert id="insertUser" parameterType="top.lucas9.entity.User">
+        insert into `user`(`username`,
+                           `password`,
+                           `phone_number`,
+                           `email`,
+                           `role`,
+                           `borrowable_days`,
+                           `borrowable_number`,
+                           `borrowed_number`)
+        values (#{user.username},
+                md5(#{user.password}),
+                #{user.phoneNumber},
+                #{user.email},
+                #{user.role},
+                #{user.borrowableDays},
+                #{user.borrowableNumber},
+                #{user.borrowedNumber})
+    </insert>
+    <select id="selectByUsername" resultType="integer">
+        select `id`
+        from `user`
+        where username = #{username}
+    </select>
+    <select id="selectByPhoneNumber" resultType="integer">
+        select `id`
+        from `user`
+        where phone_number = #{phoneNumber}
+    </select>
+    <select id="selectByEmail" resultType="integer">
+        select `id`
+        from `user`
+        where email = #{email}
+    </select>
+    <select id="selectToResetPassword" resultType="integer" parameterType="top.lucas9.entity.ResetPasswordDto">
+        select `id`
+        from `user`
+        where username = #{resetPasswordDto.username}
+          and email = #{resetPasswordDto.email}
+          and phone_number = #{resetPasswordDto.phoneNumber}
+          and password = md5(#{resetPasswordDto.originalPassword})
+    </select>
+    <select id="selectUserByKeyword" resultType="top.lucas9.entity.User">
+        select `username`,
+               `phone_number`,
+               `email`,
+               `role`,
+               `borrowable_days`,
+               `borrowable_number`,
+               `borrowed_number`
+        from `user`
+        where `username` like concat("%", #{keyword}, "%")
+    </select>
+    <select id="selectUserByUsername" resultType="top.lucas9.entity.User">
+        select `username`,
+               `phone_number`,
+               `email`,
+               `role`,
+               `borrowable_days`,
+               `borrowable_number`,
+               `borrowed_number`
+        from `user`
+        where `username` = #{username}
+    </select>
+
+    <update id="updatePassword">
+        update `user`
+        set password = #{newPassword}
+        where id = #{userId}
+    </update>
+    <update id="updateUser">
+        update `user`
+        set `role`              = #{user.role},
+            `borrowable_days`   = #{user.borrowableDays},
+            `borrowable_number` = #{user.borrowableNumber},
+            `borrowed_number`   = #{user.borrowedNumber}
+        where `username` = #{user.username}
+    </update>
+    <update id="updateUserBorrowBook">
+        update `user`
+        set `borrowable_number` = `borrowable_number` - 1,
+            `borrowed_number`   = `borrowed_number` + 1
+        where `username` = #{username} and `borrowable_number` > 0
+    </update>
+    <update id="updateUserReturnBook">
+        update `user`
+        set `borrowable_number` = `borrowable_number` + 1,
+            `borrowed_number`   = `borrowed_number` - 1
+        where `username` = #{username}
+    </update>
+</mapper>

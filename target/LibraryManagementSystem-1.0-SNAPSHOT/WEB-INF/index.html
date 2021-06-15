@@ -1,0 +1,810 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>图书管理系统</title>
+    <script src="../jquery/jquery-3.5.1.min.js"></script>
+    <script src="../cookie/js.cookie-2.2.1.min.js"></script>
+    <script src="../bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../layer/layer.js"></script>
+    <script src="../script/jquery.pagination.js"></script>
+    <script src="../script/my_script.js"></script>
+    <link rel="stylesheet" href="../bootstrap-3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/pagination.css" />
+</head>
+
+<body>
+    <nav class="navbar  navbar-default" style="background-color: lightgreen;" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">图书馆管理系统</a>
+            </div>
+            <div>
+                <div id="USER">
+                    <!-- 普通用户 -->
+                    <div class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input id="searchBookInput" autocomplete="on" required type="text" class="form-control" placeholder="书名">
+                        </div>
+                        <button id="searchBook" type="submit" class="btn btn-default">搜索图书</button>
+                    </div>
+                </div>
+                <div id="ADMIN" style="display: none">
+                    <!-- 管理员 -->
+                    <div class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input id="searchRecordsInput" autocomplete="on" required type="text" class="form-control" placeholder="用户名/书名">
+                        </div>
+                        <button id="searchRecords" type="submit" class="btn btn-default">查询记录</button>
+                    </div>
+                    <div class="navbar-form navbar-left">
+                        &emsp;&emsp;
+                        <button id="insertBook" type="submit" class="btn btn-default" data-toggle="modal" data-target="#insertBookDialog">添加图书</button>
+                    </div>
+                </div>
+               <div id="SUPER_ADMIN" style="display: none">
+                   <!-- 超级管理员 -->
+                   <div class="navbar-form navbar-left" role="search">
+                       <div class="form-group">
+                           <input id="searchUserInput" autocomplete="on" required type="text" class="form-control" placeholder="用户名">
+                       </div>
+                       <button id="searchUser" type="submit" class="btn btn-default">搜索用户</button>
+                   </div>
+               </div>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a id="login" href="/to/login"><span class="glyphicon glyphicon-log-in"></span> 登录 / 注册</a></li>
+                    <li class="dropdown">
+                        <a id="dropdownButton" style="display: none" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">用户名 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a id="borrowingRecords" href="#">借阅记录</a></li>
+                            <li><a id="logout" href="#">退出</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="userInfoDialog" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="col-md-15">
+                        <form id="userInfoForm" role="form">
+                            <fieldset>
+                                <legend>个人信息</legend>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">用户名</label>
+                                    <input autocomplete="on" id="usernameInfo" required readonly type="text" class="form-control" name="username">
+                                </div>
+                                <div id="auth" style="display: none">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">权限</label>
+                                        <select id="roleInfo" autocomplete="on" required class="form-control" name="authority">
+                                            <option>USER</option>
+                                            <option>ADMIN</option>
+                                            <option>SUPER_ADMIN</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">可借天数</label>
+                                        <input autocomplete="on" id="borrowableDays" required type="number" class="form-control" name="email">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">可借数目</label>
+                                        <input autocomplete="on" id="borrowableNumber" required type="number" class="form-control" name="email">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">已借数目</label>
+                                        <input autocomplete="on" id="borrowedNumber" required type="number" class="form-control" name="email">
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <button id="updateUserInfoButton" type="submit" class="btn btn-block btn-info">修改</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="uploadUrl" style="z-index: 9999" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="col-md-15">
+                        <iframe tabindex="2" src="https://imgkr.com/#upload" height="300px" width="100%"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="insertBookDialog" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="col-md-15">
+                        <form id="bookInfoForm" role="form">
+                            <fieldset>
+                                <legend>图书信息</legend>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">封面</label>
+                                    <input autocomplete="on" id="coverUrl" required type="text" class="form-control" name="coverUrl">
+                                    <a href="#"  data-toggle="modal" data-target="#uploadUrl">上传封面</a>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">书名</label>
+                                    <input autocomplete="on" id="bookName" required type="text" class="form-control" name="bookName">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">作者</label>
+                                    <input autocomplete="on" id="bookAuthor" required type="text" class="form-control" name="bookAuthor">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">数量</label>
+                                    <input autocomplete="on" id="quantity" required type="text" class="form-control" name="quantity">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">简介</label>
+                                    <input autocomplete="on" id="introduction" required type="text" class="form-control" name="introduction">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">ISBN</label>
+                                    <input autocomplete="on" id="ISBN" required type="text" class="form-control" name="ISBN">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">价格</label>
+                                    <input autocomplete="on" id="price" required type="number" class="form-control" name="price">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">出版社</label>
+                                    <input autocomplete="on" id="press" required type="text" class="form-control" name="press">
+                                </div>
+                            </fieldset>
+                            <button id="insertBookInfoButton" type="submit" class="btn btn-block btn-info">添加</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead id="tableHead">
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="12" align="center">
+                    <div id="Pagination" class="pagination"><!-- 这里显示分页 --></div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+<script>
+    let userInfo = '';
+    let role;
+    if (sessionStorage.getItem("USER_INFO")) {
+        userInfo = JSON.parse(sessionStorage.getItem('USER_INFO'));
+        $('#login').css('display','none');
+        $('#dropdownButton').html(userInfo.username+' <span class="caret"></span>');
+        $('#dropdownButton').css('display','block');
+        role = sessionStorage.getItem('ROLE');
+        if (role === 'ADMIN') {
+            $('#ADMIN').css('display', 'block');
+        } else if (role === 'SUPER_ADMIN') {
+            $('#auth').css('display', 'block');
+            $('#SUPER_ADMIN').css('display', 'block');
+            $('#ADMIN').css('display', 'block');
+        }
+    }
+    initGloballetiable();
+    initBookPagination();
+
+    $("#updateUserInfoButton").click(function () {
+        let requestDate = {
+            username:$("#usernameInfo").val(),
+            role:$("#roleInfo").val(),
+            borrowableDays:$("#borrowableDays").val(),
+            borrowableNumber:$("#borrowableNumber").val(),
+            borrowedNumber:$("#borrowedNumber").val()
+        }
+        $.ajax({
+            url:'/do/updateUser',
+            contentType:"application/json;charset=UTF-8",
+            type:"post",
+            dataType:'json',
+            data: JSON.stringify(requestDate),
+            success(responseData) {
+                layer.msg(responseData.message);
+                $("#userInfoDialog").modal('hide');
+                userPage();
+            },
+            error(responseData) {
+                let data = responseData.responseJSON;
+                layer.msg(data.message);
+            }
+        });
+        return false;
+        });
+
+    $("#insertBookInfoButton").click( function () {
+            if ($("#insertBookInfoButton").text() === "添加") {
+                window.pageNum = 1000000000;
+                insertOrUpdateBook("/do/insertBook");
+            } else {
+                insertOrUpdateBook("/do/updateBook");
+            }
+        });
+
+    $("#searchBook").click( function () {
+            window.keyword = $("#searchBookInput").val();
+            window.pageNum = 1;
+            window.pageSize = 5;
+            initBookPagination();
+        });
+
+    $("#searchRecords").click( function () {
+            window.keyword = $("#searchRecordsInput").val();
+            window.pageNum = 1;
+            window.pageSize = 5;
+            initRecordPagination(false);
+        });
+
+    $("#searchUser").click(function () {
+            window.keyword = $("#searchUserInput").val();
+            window.pageNum = 1;
+            window.pageSize = 5;
+            initUserPagination();
+        });
+
+    $("#logout").click(function () {
+        sessionStorage.setItem('USER_INFO', '');
+        sessionStorage.setItem('ROLE', '');
+        $.ajax({
+            url:"/do/logout",
+            type:"post"
+        });
+        window.location.href = '/to/index';
+    });
+
+    $("#insertBook").click(function () {
+        $("#bookInfoForm")[0].reset();
+        $("#insertBookDialog").modal("show");
+        $("#ISBN").attr("readonly",false);
+        return false;
+    });
+
+    $("#borrowingRecords").click(function () {
+        window.keyword = userInfo.username;
+        window.pageNum = 1;
+        window.pageSize = 5;
+        initRecordPagination(true);
+    })
+
+    function insertOrUpdateBook(postUrl) {
+        let requestDate = {
+            coverUrl:$("#coverUrl").val(),
+            bookName:$("#bookName").val(),
+            bookAuthor:$("#bookAuthor").val(),
+            quantity:$("#quantity").val(),
+            introduction:$("#introduction").val(),
+            isbn:$("#ISBN").val(),
+            price:$("#price").val(),
+            press:$("#press").val()
+        }
+        $.ajax({
+            url:postUrl,
+            contentType:"application/json;charset=UTF-8",
+            type:"post",
+            dataType:'json',
+            data: JSON.stringify(requestDate),
+            success(responseData) {
+                $("#insertBookDialog").modal('hide');
+                layer.msg(responseData.message);
+                bookPage();
+            },
+            error(responseData) {
+                let data = responseData.responseJSON;
+                layer.msg(data.message);
+            }
+        });
+        $("#bookInfoForm")[0].reset();
+        return false;
+    }
+
+    function initGloballetiable() {
+        window.keyword = '';
+        window.pageNum = 1;
+        window.pageSize = 5;
+    }
+
+    function initBookPagination() {
+        bookPage();
+        let paginationProperties = {
+            num_edge_entries : 3,			//边缘页数
+            num_display_entries : 5,		//主体页数
+            callback : BookPageCallback,	//回调函数
+            items_per_page : 5,	//每页显示数据数量，就是pageSize
+            current_page : window.pageNum - 1,//当前页页码
+            prev_text : "上一页",			//上一页文本
+            next_text : "下一页"			//下一页文本
+        };
+        // 显示分页导航条
+        $("#Pagination").pagination(window.total, paginationProperties);
+    }
+
+    function BookPageCallback(pageIndex) {
+        window.pageNum = pageIndex + 1;
+        bookPage();
+        return false;
+    }
+
+    function initUserPagination() {
+        userPage();
+        let paginationProperties = {
+            num_edge_entries : 3,			//边缘页数
+            num_display_entries : 5,		//主体页数
+            callback : UserPageCallback,	//回调函数
+            items_per_page : 5,	//每页显示数据数量，就是pageSize
+            current_page : window.pageNum - 1,//当前页页码
+            prev_text : "上一页",			//上一页文本
+            next_text : "下一页"			//下一页文本
+        };
+        // 显示分页导航条
+        $("#Pagination").pagination(window.total, paginationProperties);
+    }
+
+    function UserPageCallback(pageIndex) {
+        window.pageNum = pageIndex + 1;
+        bookPage();
+        return false;
+    }
+
+    function initRecordPagination(isOneself) {
+        recordPage(isOneself);
+        let paginationProperties = {
+            num_edge_entries : 3,			//边缘页数
+            num_display_entries : 5,		//主体页数
+            callback : RecordPageCallback,	//回调函数
+            items_per_page : window.pageSize,	//每页显示数据数量，就是pageSize
+            current_page : window.pageNum - 1,//当前页页码
+            prev_text : "上一页",			//上一页文本
+            next_text : "下一页"			//下一页文本
+        };
+        // 显示分页导航条
+        $("#Pagination").pagination(window.total, paginationProperties);
+    }
+
+    function RecordPageCallback(pageIndex) {
+        window.pageNum = pageIndex + 1;
+        recordPage();
+        return false;
+    }
+
+    function bookPage() {
+        $.ajax({
+            url:`/do/selectBookByKeyword?pageNum=${window.pageNum}&pageSize=${window.pageSize}&keyword=${window.keyword}`,
+            contentType:"application/json;charset=UTF-8",
+            type:"get",
+            dataType:'json',
+            async:false,
+            success(responseData) {
+                let data = responseData.data;
+                window.total = data.total;
+                window.pageNum = data.pageNum;
+                window.pageSize = data.pageSize;
+                window.keyword = '';
+                showBookData(data.list);
+            },
+            error(responseData) {
+                let data = responseData.responseJSON;
+                layer.msg(data.message);
+            }
+        });
+    }
+
+    function userPage() {
+        $.ajax({
+            url:`/do/selectUserByKeyword?pageNum=${window.pageNum}&pageSize=${window.pageSize}&keyword=${window.keyword}`,
+            contentType:"application/json;charset=UTF-8",
+            type:"get",
+            dataType:'json',
+            async:false,
+            success(responseData) {
+                let data = responseData.data;
+                window.total = data.total;
+                window.pageNum = data.pageNum;
+                window.pageSize = data.pageSize;
+                window.keyword = '';
+                showUserData(data.list);
+            },
+            error(responseData) {
+                let data = responseData.responseJSON;
+                layer.msg(data.message);
+            }
+        });
+    }
+
+    function recordPage(isOneself) {
+        if (isOneself === undefined) {
+            isOneself = false;
+        }
+        $.ajax({
+            url:`/do/selectRecordByKeyword?pageNum=${window.pageNum}&pageSize=${window.pageSize}&keyword=${window.keyword}&isOneself=${isOneself}`,
+            contentType:"application/json;charset=UTF-8",
+            type:"get",
+            dataType:'json',
+            async:false,
+            success(responseData) {
+                let data = responseData.data;
+                window.total = data.total;
+                window.pageNum = data.pageNum;
+                window.pageSize = data.pageSize;
+                showRecordData(data.list);
+            },
+            error(responseData) {
+                let data = responseData.responseJSON;
+                layer.msg(data.message);
+            }
+        });
+    }
+
+    function createBookListTableHead() {
+        $('#tableHead').empty();
+        let tableHead = document.getElementById('tableHead');
+        let tr = document.createElement("tr");
+        let td1 = document.createElement("th");
+        let td2 = document.createElement("th");
+        let td3 = document.createElement("th");
+        let td4 = document.createElement("th");
+        let td5 = document.createElement("th");
+        let td6 = document.createElement("th");
+        let td7 = document.createElement("th");
+        let td8 = document.createElement("th");
+        let td9 = document.createElement("th");
+        let td10 = document.createElement("th");
+        td1.innerHTML = "序号";
+        td2.innerHTML = "封面";
+        td3.innerHTML = "书名";
+        td4.innerHTML = "作者";
+        td5.innerHTML = "数量";
+        td6.innerHTML = "简介";
+        td7.innerHTML = "ISBN";
+        td8.innerHTML = "价格";
+        td9.innerHTML = "出版社";
+        td10.innerHTML = "借阅";
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+        tr.appendChild(td5);
+        tr.appendChild(td6);
+        tr.appendChild(td7);
+        tr.appendChild(td8);
+        tr.appendChild(td9);
+        tr.appendChild(td10);
+        if (role === "ADMIN" || role === "SUPER_ADMIN") {
+            let t11 = document.createElement("th");
+            t11.innerHTML = "修改";
+            tr.appendChild(t11);
+            let t12 = document.createElement("th");
+            t12.innerHTML = "删除";
+            tr.appendChild(t12);
+        }
+        tableHead.appendChild(tr);
+    }
+
+    function showBookData(data) {
+        createBookListTableHead();
+        let bookList = data;
+        let tableBody = document.getElementById('tableBody');
+        $('#tableBody').empty();
+        for (let i = 0; i < bookList.length; i++) {
+            let tr = document.createElement("tr");
+            let td1 = document.createElement("td");
+            let td2 = document.createElement("td");
+            let td3 = document.createElement("td");
+            let td4 = document.createElement("td");
+            let td5 = document.createElement("td");
+            let td6 = document.createElement("td");
+            let td7 = document.createElement("td");
+            let td8 = document.createElement("td");
+            let td9 = document.createElement("td");
+            let td10 = document.createElement("td");
+            td1.innerHTML = "" + (i + 1);
+            td2.innerHTML = "<img style='width: 70px; height: 90px' src='" +bookList[i].coverUrl +"'>";
+            td3.innerHTML = bookList[i].bookName;
+            td4.innerHTML = bookList[i].bookAuthor;
+            td5.innerHTML = bookList[i].quantity;
+            td6.innerHTML = bookList[i].introduction;
+            td7.innerHTML = bookList[i].isbn;
+            td8.innerHTML = bookList[i].price;
+            td9.innerHTML = bookList[i].press;
+            if (bookList[i].quantity > 0 && userInfo) {
+                td10.innerHTML = "<button class='btn btn-success' type='button' >借阅</button>";
+                td10.onclick = function () {
+                    layer.confirm("确认借阅该图书么", {btn: ['确定', '取消'], title: "提示"},function () {
+                        let requestData = {
+                            bookName: bookList[i].bookName,
+                            bookId: bookList[i].id,
+                            borrower: userInfo.username
+                        };
+                        $.ajax({
+                            url: '/do/borrowBook',
+                            contentType: "application/json;charset=UTF-8",
+                            type: "post",
+                            dataType: 'json',
+                            data: JSON.stringify(requestData),
+                            success(responseData) {
+                                layer.msg(responseData.message);
+                                bookPage();
+                            },
+                            error(responseData) {
+                                let data = responseData.responseJSON;
+                                layer.msg(data.message);
+                            }
+                        });
+                        layer.close(layer.index);
+                    })
+                }
+            } else {
+                td10.innerHTML = "<button class='btn btn-success' disabled='disabled' type='button' >借阅</button>";
+            }
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
+            tr.appendChild(td6);
+            tr.appendChild(td7);
+            tr.appendChild(td8);
+            tr.appendChild(td9);
+            tr.appendChild(td10);
+            if (role === "ADMIN" || role === "SUPER_ADMIN") {
+                let td11 = document.createElement("td");
+                td11.innerHTML = "<button class='btn btn-success' type='button' >修改</button>";
+                tr.appendChild(td11);
+                let td12 = document.createElement("td");
+                td12.innerHTML = "<button class='btn btn-success' type='button' >删除</button>";
+                tr.appendChild(td12);
+                td11.onclick = function () {
+                    $("#coverUrl").val(bookList[i].coverUrl);
+                    $("#bookName").val(bookList[i].bookName);
+                    $("#bookAuthor").val(bookList[i].bookAuthor);
+                    $("#quantity").val(bookList[i].quantity);
+                    $("#introduction").val(bookList[i].introduction);
+                    $("#ISBN").val(bookList[i].isbn);
+                    $("#ISBN").attr("readonly",true);
+                    $("#price").val(bookList[i].price);
+                    $("#press").val(bookList[i].press);
+                    $("#insertBookInfoButton").text("修改");
+                    $("#insertBookDialog").modal('show');
+                }
+                td12.onclick = function () {
+                    layer.confirm("确认删除该图书么", {btn: ['确定', '取消'], title: "提示"},function () {
+                        $.ajax({
+                            url:`/do/deleteBook?isbn=${bookList[i].isbn}`,
+                            contentType:"application/json;charset=UTF-8",
+                            type:"get",
+                            dataType:'json',
+                            success(responseData) {
+                                layer.msg(responseData.message);
+                                bookPage();
+                            },
+                            error(responseData) {
+                                let data = responseData.responseJSON;
+                                layer.msg(data.message);
+                            }
+                        });
+                        layer.close(layer.index);
+                    })
+                }
+            }
+            tableBody.appendChild(tr);
+        }
+    }
+
+    function createUserListTableHead() {
+        $('#tableHead').empty();
+        let tableHead = document.getElementById('tableHead');
+        let tr = document.createElement("tr");
+        let td1 = document.createElement("th");
+        let td2 = document.createElement("th");
+        let td3 = document.createElement("th");
+        let td4 = document.createElement("th");
+        let td5 = document.createElement("th");
+        let td6 = document.createElement("th");
+        let td7 = document.createElement("th");
+        let td8 = document.createElement("th");
+        let td9 = document.createElement("th");
+        let td10 = document.createElement("th");
+        td1.innerHTML = "序号";
+        td2.innerHTML = "用户名";
+        td3.innerHTML = "手机号";
+        td4.innerHTML = "邮箱";
+        td5.innerHTML = "角色";
+        td6.innerHTML = "可借天数";
+        td7.innerHTML = "可借数目";
+        td8.innerHTML = "已借数目";
+        td9.innerHTML = "修改";
+        td10.innerHTML = "删除";
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+        tr.appendChild(td5);
+        tr.appendChild(td6);
+        tr.appendChild(td7);
+        tr.appendChild(td8);
+        tr.appendChild(td9);
+        tr.appendChild(td10);
+        tableHead.appendChild(tr);
+    }
+
+    function showUserData(data) {
+        createUserListTableHead();
+        let userList = data;
+        let tableBody = document.getElementById('tableBody');
+        $('#tableBody').empty();
+        for (let i = 0; i < userList.length; i++) {
+            let tr = document.createElement("tr");
+            let td1 = document.createElement("td");
+            let td2 = document.createElement("td");
+            let td3 = document.createElement("td");
+            let td4 = document.createElement("td");
+            let td5 = document.createElement("td");
+            let td6 = document.createElement("td");
+            let td7 = document.createElement("td");
+            let td8 = document.createElement("td");
+            let td9 = document.createElement("td");
+            let td10 = document.createElement("td");
+            td1.innerHTML = "" + (i + 1);
+            td2.innerHTML = userList[i].username;
+            td3.innerHTML = userList[i].phoneNumber;
+            td4.innerHTML = userList[i].email;
+            td5.innerHTML = userList[i].role;
+            td6.innerHTML = userList[i].borrowableDays;
+            td7.innerHTML = userList[i].borrowableNumber;
+            td8.innerHTML = userList[i].borrowedNumber;
+            td9.innerHTML = "<button class='btn btn-success' type='button'>修改</button>";
+            td10.innerHTML = "<button class='btn btn-success' type='button'>删除</button>";
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
+            tr.appendChild(td6);
+            tr.appendChild(td7);
+            tr.appendChild(td8);
+            tr.appendChild(td9);
+            tr.appendChild(td10);
+            td9.onclick = function(){
+                $('#usernameInfo').val(userList[i].username);
+                $('#roleInfo').val(userList[i].role);
+                $('#borrowableDays').val(userList[i].borrowableDays);
+                $('#borrowableNumber').val(userList[i].borrowableNumber);
+                $('#borrowedNumber').val(userList[i].borrowedNumber);
+                $('#userInfoDialog').modal('show');
+            };
+
+            td10.onclick = function() {
+                layer.confirm("确认删除该用户么？", {btn: ['确定', '取消'], title: "提示"},function () {
+                    $.ajax({
+                        url:`/do/deleteUser?username=${userList[i].username}`,
+                        contentType:"application/json;charset=UTF-8",
+                        type:"get",
+                        dataType:'json',
+                        success(responseData) {
+                            layer.msg(responseData.message);
+                            userPage();
+                        },
+                        error(responseData) {
+                            let data = responseData.responseJSON;
+                            layer.msg(data.message);
+                        }
+                    });
+                    layer.close(layer.index);
+                })
+            }
+            tableBody.appendChild(tr);
+        }
+    }
+
+    function createRecordsTableHead() {
+        $('#tableHead').empty();
+        let tableHead = document.getElementById('tableHead');
+        let tr = document.createElement("tr");
+        let td1 = document.createElement("th");
+        let td2 = document.createElement("th");
+        let td3 = document.createElement("th");
+        let td4 = document.createElement("th");
+        let td5 = document.createElement("th");
+        let td6 = document.createElement("th");
+        let td7 = document.createElement("th");
+        let td8 = document.createElement("th");
+        td1.innerHTML = '序号';
+        td3.innerHTML = "书名";
+        td4.innerHTML = "借阅者";
+        td5.innerHTML = "借阅时间";
+        td6.innerHTML = "截止归还天数";
+        td7.innerHTML = "归还时间";
+        td8.innerHTML = "操作"
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+        tr.appendChild(td5);
+        tr.appendChild(td6);
+        tr.appendChild(td7);
+        tr.appendChild(td8);
+        tableHead.appendChild(tr);
+    }
+
+    function showRecordData(data) {
+        createRecordsTableHead()
+        let recordList = data;
+        let tableBody = document.getElementById('tableBody');
+        $('#tableBody').empty();
+        for (let i = 0; i < recordList.length; i++) {
+            let tr = document.createElement("tr");
+            let td1 = document.createElement("td");
+            let td2 = document.createElement("td");
+            let td3 = document.createElement("td");
+            let td4 = document.createElement("td");
+            let td5 = document.createElement("td");
+            let td6 = document.createElement("td");
+            let td7 = document.createElement("td");
+            let td8 = document.createElement("td");
+            td1.innerHTML = "" + (i + 1);
+            td3.innerHTML = recordList[i].bookName;
+            td4.innerHTML = recordList[i].borrower;
+            td5.innerHTML = `${recordList[i].loanDate.year}-${recordList[i].loanDate.monthValue}-${recordList[i].loanDate.dayOfMonth}`;
+            td6.innerHTML = recordList[i].deadline;
+            td7.innerHTML = '未归还';
+            if (recordList[i].returned !== false) {
+                td7.innerHTML = `${recordList[i].returnDate.year}-${recordList[i].returnDate.monthValue}-${recordList[i].returnDate.dayOfMonth}`;
+                td8.innerHTML = "<button class='btn btn-success' disabled='disabled' type='button'>归还</button>";
+            } else {
+                td8.innerHTML = "<button class='return btn btn-success' type='button'>归还</button>";
+                td8.onclick = function () {
+                    layer.confirm("确认还书么？", {btn: ['确定', '取消'], title: "提示"}, function () {
+                        $.ajax({
+                            url: `/do/returnBook?bookId=${recordList[i].bookId}&recordId=${recordList[i].id}&username=${recordList[i].borrower}`,
+                            contentType: "application/json;charset=UTF-8",
+                            type: "get",
+                            dataType: 'json',
+                            success(responseData) {
+                                layer.msg(responseData.message);
+                                window.keyword = userInfo.username;
+                                recordPage(true);
+                            },
+                            error(responseData) {
+                                let data = responseData.responseJSON;
+                                layer.msg(data.message);
+                            }
+                        });
+                        layer.close(layer.index);
+                    })
+                }
+            }
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
+            tr.appendChild(td6);
+            tr.appendChild(td7);
+            tr.appendChild(td8);
+            tableBody.appendChild(tr);
+        }
+    }
+</script>
+</html>

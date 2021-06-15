@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.lucas9.mapper.RecordMapper">
+
+    <insert id="insertRecord">
+        insert into `borrowingRecords`(`book_name`, `book_id`, `borrower`, `loan_date`, `deadline`)
+        values (#{record.bookName},#{record.bookId},#{record.borrower},#{record.loanDate},#{record.deadline})
+    </insert>
+    <update id="updateRecord">
+        update `borrowingRecords` set `return_date` = #{returnDate}, `returned` = true where `id` = #{recordId}
+    </update>
+    <select id="selectRecordByKeyword" resultType="top.lucas9.entity.BorrowingRecords">
+        select `id`,`book_name`, `book_id`, `borrower`, `loan_date`, `return_date`, `deadline`, `returned`
+        from `borrowingRecords`
+        <if test="isOneself != 'true'">
+            where `borrower` like concat("%", #{keyword}, "%")
+            or `book_name` like concat("%", #{keyword}, "%")
+        </if>
+        <if test="isOneself == 'true'">
+            where `borrower` = #{keyword}
+        </if>
+    </select>
+</mapper>

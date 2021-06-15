@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/controller/CommonController.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/controller/UserController.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/controller/ViewController.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/entity/Book.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/entity/BorrowingRecords.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/entity/LoginDto.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/entity/ResultEntity.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/entity/User.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/exception/GlobalExceptionHandler.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/mapper/UserMapper.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/service/UserService.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/top/lucas9/service/impl/UserServiceImpl.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/webapp/jquery/jquery-3.5.1.min.js" charset="GBK" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

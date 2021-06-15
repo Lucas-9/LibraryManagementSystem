@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.lucas9.mapper.BookMapper">
+    <insert id="insertBook" parameterType="top.lucas9.entity.Book">
+        insert into `book`(`cover_url`, `book_name`, `book_author`, `quantity`, `introduction`, `isbn`, `price`,
+                           `press`)
+        values (#{book.coverUrl}, #{book.bookName}, #{book.bookAuthor}, #{book.quantity}, #{book.introduction},
+                #{book.isbn}, #{book.price}, #{book.press})
+    </insert>
+    <update id="updateBook">
+        update `book`
+        set `cover_url`    = #{book.coverUrl},
+            `book_name`    = #{book.bookName},
+            `book_author`  = #{book.bookAuthor},
+            `quantity`     = #{book.quantity},
+            `introduction` = #{book.introduction},
+            `price`        = #{book.price},
+            `press`        = #{book.press}
+        where `isbn` = #{book.isbn}
+    </update>
+    <update id="updateBookBorrowBook">
+        update `book`
+        set `quantity` = `quantity` - 1
+        where `quantity` > 0
+          and `id` = #{bookId}
+    </update>
+    <update id="updateBookReturnBook">
+        update `book`
+        set `quantity` = `quantity` + 1
+        where `id` = #{bookId}
+    </update>
+    <delete id="deleteBook">
+        delete
+        from `book`
+        where `isbn` = #{isbn}
+    </delete>
+    <select id="selectIdByIsbn" resultType="java.lang.Integer">
+        select `id`
+        from `book`
+        where `isbn` = #{isbn}
+    </select>
+    <select id="selectBookByKeyword" resultType="top.lucas9.entity.Book">
+        select `id`,
+               `cover_url`,
+               `book_name`,
+               `book_author`,
+               `quantity`,
+               `introduction`,
+               `isbn`,
+               `price`,
+               `press`
+        from `book`
+        where `book_name` like concat("%", #{keyword}, "%")
+           or `book_author` like concat("%", #{keyword}, "%")
+    </select>
+    <select id="selectBookNumber" resultType="java.lang.Integer">
+        select `quantity`
+        from `book`
+        where `id` = #{bookId}
+    </select>
+</mapper>
